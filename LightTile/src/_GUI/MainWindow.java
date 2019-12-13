@@ -27,7 +27,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	JPanel map_panel,settings,grid,space,tileset_map,tileset_space,tileset_grid,buttonBar;
 	JScrollPane mapscroll,tilesetscroll;
 	ButtonGroup spritegroup,buttonBarGroup;
-	JButton mode, save,copy,erase,all;
+	JButton mode, save,copy,erase,all,margin;
 	JComboBox<String> tilesets;
 	JLabel actualSpriteLbl;
 	DefaultComboBoxModel<String> tileset_model;
@@ -38,8 +38,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	Cursor pointer;
     Spritesheet sheet;
 	Icon actualSprite;
-	int state;
-	boolean eraseMode;
+	boolean eraseMode,gridmode;
 	
 	public HashMap<Integer, String> spritesheets;
 	
@@ -50,7 +49,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		TH = map.getHeight();
 		TW = map.getWidth();
 		
-		state=0;
+		gridmode=false;
+		
 		dark = new Color(30,30,30);
 		light = new Color(50,50,50);
 		medium = new Color(40,40,40);
@@ -99,9 +99,9 @@ public class MainWindow extends JFrame implements ActionListener {
 		erase.setBorder(lightborder);
 		erase.setCursor(pointer);
 		erase.setFont(erase.getFont().deriveFont(12f));
-		erase.setPreferredSize(new Dimension(50,30));
+		erase.setPreferredSize(new Dimension(30,30));
 		erase.setFocusable(false);
-		erase.setName("EraseMode");
+		erase.setName("E");
 		erase.addActionListener(this);
 		
 		copy = new JButton("C");
@@ -110,9 +110,9 @@ public class MainWindow extends JFrame implements ActionListener {
 		copy.setBorder(lightborder);
 		copy.setCursor(pointer);
 		copy.setFont(copy.getFont().deriveFont(12f));
-		copy.setPreferredSize(new Dimension(50,30));
+		copy.setPreferredSize(new Dimension(30,30));
 		copy.setFocusable(false);
-		copy.setName("copyMode");
+		copy.setName("C");
 		copy.addActionListener(this);
 		
 		all = new JButton("A");
@@ -121,10 +121,21 @@ public class MainWindow extends JFrame implements ActionListener {
 		all.setBorder(lightborder);
 		all.setCursor(pointer);
 		all.setFont(all.getFont().deriveFont(12f));
-		all.setPreferredSize(new Dimension(50,30));
+		all.setPreferredSize(new Dimension(30,30));
 		all.setFocusable(false);
-		all.setName("allMode");
+		all.setName("A");
 		all.addActionListener(this);
+		
+		margin = new JButton("G");
+		margin.setBackground(new Color(60,60,60));
+		margin.setForeground(Color.white);
+		margin.setBorder(lightborder);
+		margin.setCursor(pointer);
+		margin.setFont(margin.getFont().deriveFont(12f));
+		margin.setPreferredSize(new Dimension(30,30));
+		margin.setFocusable(false);
+		margin.setName("G");
+		margin.addActionListener(this);
 		
 		
 		buttonBarGroup.add(erase);
@@ -135,6 +146,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		buttonBar.add(erase);
 		buttonBar.add(copy);
 		buttonBar.add(all);
+		buttonBar.add(margin);
 		window.add(buttonBar,BorderLayout.NORTH);
 		
 	}
@@ -338,41 +350,38 @@ public class MainWindow extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource().equals(tilesets)) changeTileset(e);
-
-		try {
-				JButton btn = (JButton) e.getSource();
-				if(btn.getName().charAt(0) == 'M' && !eraseMode) state = 0;
-				if(btn.getName().charAt(0) == 'T' && !eraseMode) 	state = 1;
-				
-				if(btn.equals(erase)) {
-					eraseMode = !eraseMode;
-					if(eraseMode) {
-						btn.setBackground(new Color(40,40,40));
-						btn.setBorder(null);
-					}else {
-						btn.setBackground(new Color(60,60,60));
-						btn.setBorder(border);
-					}
-					state = 2;
+		
+		JButton btn = null;
+		if(e.getSource() instanceof JButton) {
+			btn = (JButton)e.getSource();
+			
+			String name = btn.getName();
+			
+			switch (name.charAt(0)) {
+			case 'T':
+				actualSprite = btn.getIcon();
+				actualSpriteLbl.setIcon(actualSprite);
+				break;
+			case 'M':
+				btn.setIcon(actualSprite);
+				break;
+			case 'G':
+				gridmode = !gridmode;
+				if(gridmode) {
+					btn.setBackground(dark);
+					btn.setBorder(null);
+					for (int i = 0; i < TW*TH; i++) ((JComponent) grid.getComponent(i)).setBorder(null);
+				}else {
+					btn.setBackground(light);
+					btn.setBorder(lightborder);
+					for (int i = 0; i < TW*TH; i++) ((JComponent) grid.getComponent(i)).setBorder(border);
 				}
 				
-				switch (state) {
-				case 0: // paint
-					if(btn.getName().substring(0,1).equals("M")) btn.setIcon(actualSprite);
-					break;
-				case 1: // getSprite
-					if(btn.getName().substring(0,1).equals("T")) actualSprite = btn.getIcon();
-					actualSpriteLbl.setIcon(actualSprite);
-					break;
-				case 2:
-					if(btn.getName().substring(0,1).equals("M"))btn.setIcon(new ImageIcon());
-					break;					
-				default:
-					System.out.println("Other!!");
-				}	
-		}catch (Exception ex) {}
-	}	
-
+			break;
+			}
+			
+			System.out.println(btn.getName());	}	
+		}
 	//CHANGE TILESET
 	private void changeTileset(ActionEvent e) {
 		
