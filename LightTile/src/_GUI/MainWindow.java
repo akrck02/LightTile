@@ -19,26 +19,27 @@ import beans.Spritesheet;
 public class MainWindow extends JFrame implements ActionListener {
 
 	//attibutes 
-	final int W=1000,H=640;
-	final int TW,TH;
-	LightMap map;
+	private final int W=1000,H=640;
+	private final int TW,TH;
+	private LightMap map;
+	private Buttonbar buttonbar;
+	private ScrollUI scrollui_1,scrollui_2,scrollui_3,scrollui_4;
 	
-	BasicScrollBarUI UI, UI2 ,UI3,UI4;
-	JPanel map_panel,settings,grid,space,tileset_map,tileset_space,tileset_grid,buttonBar;
-	JScrollPane mapscroll,tilesetscroll;
-	ButtonGroup spritegroup,buttonBarGroup;
-	JButton mode, save,copy,erase,all,margin;
-	JComboBox<String> tilesets;
-	JLabel actualSpriteLbl;
-	DefaultComboBoxModel<String> tileset_model;
 	
-	Color dark,medium,light;
-	Container window;
-	Border border,lightborder;
-	Cursor pointer;
-    Spritesheet sheet;
-	Icon actualSprite;
-	boolean eraseMode,gridmode;
+	private JPanel map_panel,settings,grid,space,tileset_map,tileset_space,tileset_grid,buttonBar;
+	private JScrollPane mapscroll,tilesetscroll;
+	private ButtonGroup spritegroup;
+	private JButton mode,save;
+	private JComboBox<String> tilesets;
+	private DefaultComboBoxModel<String> tileset_model;
+	
+	private Color dark,medium,light;
+	private Container window;
+	private Border border,lightborder;
+	private Cursor pointer;
+    private Spritesheet sheet;
+	private Icon actualSprite;
+	private boolean eraseMode,gridmode;
 	
 	public HashMap<Integer, String> spritesheets;
 	
@@ -49,7 +50,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		TH = map.getHeight();
 		TW = map.getWidth();
 		
-		gridmode=false;
+		gridmode = false;
+		eraseMode = false;
 		
 		dark = new Color(30,30,30);
 		light = new Color(50,50,50);
@@ -58,7 +60,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		lightborder = BorderFactory.createLineBorder(light);
 		pointer = new Cursor(12);
 		
-		setTitle("LightTile v0.1");
+		setTitle("LightTile v0.2");
 		setSize(W, H);
 		setResizable(false);
 		setLocationRelativeTo(null);
@@ -85,76 +87,14 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	//CREATE BUTTONBAR
 	private void createButtonBar() {
-		buttonBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		buttonBar.setBackground(dark);
-		buttonBarGroup = new ButtonGroup();
-		
-		actualSpriteLbl = new JLabel();
-		actualSpriteLbl.setBorder(lightborder);
-		actualSpriteLbl.setPreferredSize(new Dimension(32,32));
-		
-		erase = new JButton("E");
-		erase.setBackground(new Color(60,60,60));
-		erase.setForeground(Color.white);
-		erase.setBorder(lightborder);
-		erase.setCursor(pointer);
-		erase.setFont(erase.getFont().deriveFont(12f));
-		erase.setPreferredSize(new Dimension(30,30));
-		erase.setFocusable(false);
-		erase.setName("E");
-		erase.addActionListener(this);
-		
-		copy = new JButton("C");
-		copy.setBackground(new Color(60,60,60));
-		copy.setForeground(Color.white);
-		copy.setBorder(lightborder);
-		copy.setCursor(pointer);
-		copy.setFont(copy.getFont().deriveFont(12f));
-		copy.setPreferredSize(new Dimension(30,30));
-		copy.setFocusable(false);
-		copy.setName("C");
-		copy.addActionListener(this);
-		
-		all = new JButton("A");
-		all.setBackground(new Color(60,60,60));
-		all.setForeground(Color.white);
-		all.setBorder(lightborder);
-		all.setCursor(pointer);
-		all.setFont(all.getFont().deriveFont(12f));
-		all.setPreferredSize(new Dimension(30,30));
-		all.setFocusable(false);
-		all.setName("A");
-		all.addActionListener(this);
-		
-		margin = new JButton("G");
-		margin.setBackground(new Color(60,60,60));
-		margin.setForeground(Color.white);
-		margin.setBorder(lightborder);
-		margin.setCursor(pointer);
-		margin.setFont(margin.getFont().deriveFont(12f));
-		margin.setPreferredSize(new Dimension(30,30));
-		margin.setFocusable(false);
-		margin.setName("G");
-		margin.addActionListener(this);
-		
-		
-		buttonBarGroup.add(erase);
-		buttonBarGroup.add(copy);
-		buttonBarGroup.add(all);
-		
-		buttonBar.add(actualSpriteLbl);
-		buttonBar.add(erase);
-		buttonBar.add(copy);
-		buttonBar.add(all);
-		buttonBar.add(margin);
-		window.add(buttonBar,BorderLayout.NORTH);
-		
+		buttonbar = new Buttonbar(this);
 	}
 
 	//CREATE SETTINGS
 	private void createSettings() {
 		settings = new JPanel();
 		settings.setLayout(new FlowLayout(FlowLayout.LEADING, 20,20));
+		settings.setBackground(medium);
 		
 		mode = new JButton("COLLISIONS");
 		mode.setBackground(new Color(60,60,60));
@@ -210,9 +150,9 @@ public class MainWindow extends JFrame implements ActionListener {
 		tilesetscroll.setPreferredSize(new Dimension(250,290));
 		tilesetscroll.setBackground(dark);
 		tilesetscroll.getVerticalScrollBar().setBackground(dark);
-		tilesetscroll.getVerticalScrollBar().setUI(UI3);
+		tilesetscroll.getVerticalScrollBar().setUI(scrollui_3.getUi());
 		tilesetscroll.getHorizontalScrollBar().setBackground(dark);
-		tilesetscroll.getHorizontalScrollBar().setUI(UI4);
+		tilesetscroll.getHorizontalScrollBar().setUI(scrollui_4.getUi());
 		tilesetscroll.setBorder(null);
 			
 		tileset_space.add(tileset_grid);
@@ -243,19 +183,18 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		//crate scrollbar
 		mapscroll =  new JScrollPane(space);
+		mapscroll.setBorder(null);
 		mapscroll.setPreferredSize(new Dimension(680,550));
 		mapscroll.getHorizontalScrollBar().setBackground(medium);
 		mapscroll.getHorizontalScrollBar().setBorder(border);
-		mapscroll.getHorizontalScrollBar().setUI(UI);
+		mapscroll.getHorizontalScrollBar().setUI(scrollui_1.getUi());
 		mapscroll.getVerticalScrollBar().setBackground(medium);
 		mapscroll.getVerticalScrollBar().setBorder(border);
-		mapscroll.getVerticalScrollBar().setUI(UI2);	
+		mapscroll.getVerticalScrollBar().setUI(scrollui_2.getUi());	
 	
 		space.setLayout(new FlowLayout(FlowLayout.CENTER));
 		grid.setLayout(new GridLayout(TH,TW));
-		
-
-		
+				
 		for (int j = 0; j < TW*TH; j++) {
 			JButton btn = new JButton();
 			btn.setBackground(medium);
@@ -267,7 +206,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 			
 		map_panel.setBorder(border);
-		mapscroll.setBorder(border);
 		
 		space.add(grid);
 		map_panel.add(mapscroll,BorderLayout.CENTER);
@@ -283,66 +221,11 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	//CREATE UI
 	private void createUI() {
-		UI = new BasicScrollBarUI() {	
-			@Override protected void configureScrollBarColors(){this.thumbColor = new Color(20,20,20);}
-			@Override protected JButton createIncreaseButton(int orientation) {
-				JButton btn = super.createIncreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-			@Override protected JButton createDecreaseButton(int orientation) {
-				JButton btn = super.createDecreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-		};
-		UI2 = new BasicScrollBarUI() {	
-			@Override protected void configureScrollBarColors(){this.thumbColor = new Color(20,20,20);}
-			@Override protected JButton createIncreaseButton(int orientation) {
-				JButton btn = super.createIncreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-			@Override protected JButton createDecreaseButton(int orientation) {
-				JButton btn = super.createDecreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-		};
-		UI3 = new BasicScrollBarUI() {	
-			@Override protected void configureScrollBarColors(){this.thumbColor = new Color(20,20,20);}
-			@Override protected JButton createIncreaseButton(int orientation) {
-				JButton btn = super.createIncreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-			@Override protected JButton createDecreaseButton(int orientation) {
-				JButton btn = super.createDecreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-		};
-		UI4 = new BasicScrollBarUI() {	
-			@Override protected void configureScrollBarColors(){this.thumbColor = new Color(20,20,20);}
-			@Override protected JButton createIncreaseButton(int orientation) {
-				JButton btn = super.createIncreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-			@Override protected JButton createDecreaseButton(int orientation) {
-				JButton btn = super.createDecreaseButton(orientation);
-				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(border);
-				return btn;
-			}
-		};
+		  
+		scrollui_1 = new ScrollUI(this);
+		scrollui_2 = new ScrollUI(this);
+		scrollui_3 = new ScrollUI(this);
+		scrollui_4 = new ScrollUI(this);
 		
 	}
 
@@ -354,34 +237,66 @@ public class MainWindow extends JFrame implements ActionListener {
 		JButton btn = null;
 		if(e.getSource() instanceof JButton) {
 			btn = (JButton)e.getSource();
-			
 			String name = btn.getName();
 			
 			switch (name.charAt(0)) {
 			case 'T':
-				actualSprite = btn.getIcon();
-				actualSpriteLbl.setIcon(actualSprite);
+				if(!eraseMode){
+					
+					actualSprite = btn.getIcon();
+					buttonbar.getActualSpriteLbl().setIcon(actualSprite);
+					
+				}
 				break;
 			case 'M':
-				btn.setIcon(actualSprite);
+				
+				if(eraseMode) btn.setIcon(new ImageIcon());
+				else btn.setIcon(actualSprite);
+				break;
+			case 'E':
+				eraseMode = !eraseMode;
+				if(eraseMode) {
+					
+					btn.setBackground(dark);
+					btn.setBorder(null);
+					
+				}else {
+					
+					btn.setBackground(light);
+					btn.setBorder(lightborder);
+					
+				}				
+				
 				break;
 			case 'G':
 				gridmode = !gridmode;
 				if(gridmode) {
+					
 					btn.setBackground(dark);
 					btn.setBorder(null);
 					for (int i = 0; i < TW*TH; i++) ((JComponent) grid.getComponent(i)).setBorder(null);
+					
 				}else {
+					
 					btn.setBackground(light);
 					btn.setBorder(lightborder);
 					for (int i = 0; i < TW*TH; i++) ((JComponent) grid.getComponent(i)).setBorder(border);
+					
 				}
 				
 			break;
 			}
 			
-			System.out.println(btn.getName());	}	
-		}
+			System.out.println(name);	
+		}	
+	}
+	
+	//switch off all the modes except one
+	private void turnOffModesExcept() {
+		//array of modes []
+		
+	}
+	
 	//CHANGE TILESET
 	private void changeTileset(ActionEvent e) {
 		
@@ -420,6 +335,15 @@ public class MainWindow extends JFrame implements ActionListener {
 		revalidate();
 		repaint();
 	}
+
+	//GETTERS && SETTERS
+	public Color getDark() {return dark;}
+	public Color getLight() {return light;}
+	public Border getBorder() {return border;}
+	public Border getLightborder() {return lightborder;}
+	public Icon getActualSprite() {return actualSprite;}
+	public Cursor getPointer() {return pointer;}
+	public Container getWindow() {return window;}
 
 
 }

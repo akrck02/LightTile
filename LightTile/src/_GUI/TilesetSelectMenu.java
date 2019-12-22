@@ -3,6 +3,7 @@ package _GUI;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -19,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.border.Border;
 import javax.swing.plaf.ButtonUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
@@ -32,10 +34,18 @@ public class TilesetSelectMenu extends JDialog implements ActionListener {
 	private JScrollPane options;
 	private JButton select;
 	private BasicScrollBarUI UI;
-		
+	private Border border;
+	private Cursor pointer;
+	private Color light, dark;
+	
 	public TilesetSelectMenu(MainWindow owner) {
 		
 		this.owner = owner;
+		this.border = owner.getBorder();
+		this.pointer = owner.getPointer();
+		this.dark = owner.getDark();
+		this.light = owner.getLight();
+		
 		createUI();
 		draw();
 		setSize(400,500);
@@ -55,10 +65,10 @@ public class TilesetSelectMenu extends JDialog implements ActionListener {
 		
 		flow = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		grid = new JPanel(new GridLayout(0, 1));
-		grid.setBackground(owner.dark);
-		grid.setBorder(owner.border);
-		flow.setBackground(owner.dark);
-		flow.setBorder(owner.border);
+		grid.setBackground(dark);
+		grid.setBorder(border);
+		flow.setBackground(dark);
+		flow.setBorder(border);
 		
 		checkboxes = new ArrayList<>();
 		for (int i = 0; i < tilesets_paths.length; i++) {
@@ -74,20 +84,20 @@ public class TilesetSelectMenu extends JDialog implements ActionListener {
 		
 		select = new JButton("SELECT");
 		select.addActionListener(this);
-		select.setBackground(owner.light);
+		select.setBackground(light);
 		select.setForeground(Color.white);
 		select.setFont(select.getFont().deriveFont(18f));
-		select.setCursor(owner.pointer);
+		select.setCursor(pointer);
 		select.setFocusable(false);
-		select.setBorder(owner.border);
+		select.setBorder(border);
 		select.setPreferredSize(new Dimension(390,50));
 		
 		flow.add(grid);
 		
 		options = new JScrollPane(flow);
-		options.setBackground(owner.dark);
-		options.setBorder(owner.border);
-		options.getVerticalScrollBar().setBackground(owner.dark);
+		options.setBackground(owner.getDark());
+		options.setBorder(owner.getBorder());
+		options.getVerticalScrollBar().setBackground(owner.getDark());
 		options.getVerticalScrollBar().setUI(UI);
 				
 		window.add(select,BorderLayout.SOUTH);
@@ -100,13 +110,13 @@ public class TilesetSelectMenu extends JDialog implements ActionListener {
 			@Override protected JButton createIncreaseButton(int orientation) {
 				JButton btn = super.createIncreaseButton(orientation);
 				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(owner.border);
+				btn.setBorder(border);
 				return btn;
 			}
 			@Override protected JButton createDecreaseButton(int orientation) {
 				JButton btn = super.createDecreaseButton(orientation);
 				btn.setBackground(new Color(20,20,20));
-				btn.setBorder(owner.border);
+				btn.setBorder(border);
 				return btn;
 			}
 		};		
